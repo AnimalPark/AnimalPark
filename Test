@@ -1,0 +1,96 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@ page isELIgnored = "true" %>	
+	
+<!DOCTYPE html >
+
+<html>
+<meta charset="utf-8">
+<head>
+
+<title>Insert title here</title>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- 1단계 : 템플릿 플러그인 -->
+<script type="text/javascript"
+	src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+<!-- 2단계 : 탬플릿 구조 만들기 -->
+<script type="text/x-jquery-tmpl" id="itemTemplate">
+	<ul class='a'>
+		<li>
+			숫자: <span class="number">${num}</span>
+		</li>
+		<li>작성자: 
+			<span class="writer_user">${writer}</span>
+		</li>
+		<li>내용: 
+			<span class="contents">${content}</span>
+		</li>
+		<li>날짜: 
+			<span class="date">${datetime}</span>
+		</li>
+		<li>
+			<input type="button" value="삭제" class = "delete_btn" />
+		</li>
+	<hr />
+	</ul>
+	</script>
+<script type="text/javascript">
+	$(function() {
+		$.get("comment_list", {}, function(data) {
+			$(data).find("comment").each(function() {
+				var num = $(this).find("num").text();
+				var writer = $(this).find("writer").text();
+				var content = $(this).find("content").text();
+				var datetime = $(this).find("datetime").text();
+
+				var li_data = {
+					"num" : num,
+					"writer" : writer,
+					"content" : content,
+					"datetime" : datetime
+				};
+				var new_li = $("#itemTemplate").tmpl(li_data);
+				$("#comment_list").prepend(new_li);
+			});
+		}).fail(function() {
+			alert("덧글 목록을 불러오는데 실패하였습니다. 잠시후에 다시 시도해 주십시오.")
+		});
+		
+		$("#comment_form").submit(function(){
+			if(!$("#user_name").val()){
+				alert("입력하세요");
+				return false;
+			}
+			
+			if(!$("#comment").val()){
+				alert("내용을 입력하세요");
+				return false;
+			}
+			
+			$.post("comment_write", $(this).serialize(), function(xml){
+				
+			}).fail(function(){
+				alert("실패");
+			});
+			return false
+		});
+	});
+</script>
+</head>
+<body>
+	<h1>Ajax Comment</h1>
+
+	<form id="comment_form">
+		<label for="user_name">작성자</label> 
+		<input type="text" name="user_name" id="user_name" /> 
+		<input type="submit" value="저장하기" /> <br />
+		<br /> 
+		<label for="comment">덧글 내용</label>
+		<textarea name="comment" id="comment"></textarea>
+	</form>
+	<ul id="comment_list">
+		<!-- 여기에 동적 생성 요소가 들어가게 됩니다. -->
+	</ul>
+</body>
+</html>
